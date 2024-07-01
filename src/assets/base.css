@@ -1,0 +1,28 @@
+/* color palette from <https://github.com/vuejs/theme> */
+:root {
+  --light: #e5eef0;
+  --white: #fcfcfc;
+  --primary-color: #52b788;
+  --dark: #121212;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+strong {
+  color: var(--primary-color);
+  font-weight: bold;
+}
