@@ -26,6 +26,18 @@ const routes = [
     name: "logout",
     component: LogoutView,
   },
+  {
+    path: '/memes/:id',
+    name: 'MemeDetail',
+    component: () => import("../views/DetailMemeView.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/memes/deleted/:id',
+    name: 'MemeDeleted',
+    component: () => import("../views/MemeDeletedView.vue"),
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({

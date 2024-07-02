@@ -5,9 +5,10 @@
       <input type="search" v-model="searchMeme" placeholder="Recherche" />
     </div>
     <div class="grid">
-      <div v-for="(meme, index) in sortedMeme" :key="index">
-        <img :src="meme.imgUrl" alt="" />
+      <div v-for="meme in sortedMemes" :key="meme.id">
+        <img :src="meme.imgUrl" alt="" @click="viewMeme(meme.id)" />
         <h3>{{ meme.title }}</h3>
+        <button @click="deleteMeme(meme.id)">Supprimer</button>
       </div>
     </div>
   </div>
@@ -15,55 +16,73 @@
 
 <script>
 import MyTitle from "./MyTitle.vue";
+import axios from "axios";
+
 export default {
   data() {
     return {
       searchMeme: "",
-      memes: [
-        {
-          imgUrl: "/public/images/meme.webp",
-          title: "Mon meme 1",
-        },
-        {
-          imgUrl: "/public/images/meme.webp",
-          title: "Mon titre 2",
-        },
-        {
-          imgUrl: "/public/images/meme.webp",
-          title: "Mon idée 3",
-        },
-        {
-          imgUrl: "/public/images/meme.webp",
-          title: "Mon titre 4",
-        },
-        {
-          imgUrl: "/public/images/meme.webp",
-          title: "Mon titre 4",
-        },
-      ],
+      memes: [],
     };
   },
   components: {
     MyTitle,
   },
+  created() {
+    this.fetchMemes();
+  },
+  methods: {
+    fetchMemes() {
+      axios.get("/api/memes")
+        .then((response) => {
+          this.memes = response.data;
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la récupération des mèmes:", error);
+        });
+    },
+    deleteMeme(id) {
+      axios.delete(`/api/memes/${id}`)
+        .then(() => {
+          // Mise à jour locale des mèmes après suppression
+          this.memes = this.memes.filter((meme) => meme.id !== id);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la suppression du mème:", error);
+        });
+    },
+    viewMeme(id) {
+      this.$router.push(`/memes/${id}`);
+    },
+  },
   computed: {
-    sortedMeme() {
+    sortedMemes() {
       if (!this.searchMeme) {
         return this.memes;
       }
-      return [...this.memes].sort((a, b) => {
-        const aMatch = a.title
-          .toLowerCase()
-          .includes(this.searchMeme.toLowerCase());
-        const bMatch = b.title
-          .toLowerCase()
-          .includes(this.searchMeme.toLowerCase());
-        return aMatch === bMatch ? 0 : aMatch ? -1 : 1;
-      });
+      return this.memes.filter((meme) =>
+        meme.title.toLowerCase().includes(this.searchMeme.toLowerCase())
+      );
+    },
+  },
+  watch: {
+    memes: {
+      handler(newMemes, oldMemes) {
+        // Exemple : Déclencher une action après la suppression d'un mème
+        if (newMemes.length < oldMemes.length) {
+          this.fetchMemes(); // Réactualiser les mèmes après une suppression
+        }
+      },
+      deep: true, // Surveiller les changements profonds dans le tableau memes
     },
   },
 };
 </script>
+
+
+
+
+
 
 <style scoped>
 .search {

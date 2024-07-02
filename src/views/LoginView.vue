@@ -44,22 +44,31 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      password: "",
-      error: "",
+      password: '',
+      error: '',
     };
   },
   methods: {
-    login() {
-      const correctPassword = import.meta.env.VITE_APP_PASSWORD;
-      //   console.log("Mot de passe :", correctPassword);
-      if (this.password === correctPassword) {
-        localStorage.setItem("isAuthenticated", "true");
-        this.$router.push("/");
-      } else {
-        this.error = "Mot de passe incorrect";
+    async login() {
+      try {
+        const response = await axios.post('/api/authenticate', {
+          password: this.password,
+        });
+        if (response.data) {
+          
+          localStorage.setItem('isAuthenticated', 'true');
+          this.$router.push('/');
+        } else {
+          this.error = 'Mot de passe incorrect';
+        }
+      } catch (error) {
+        console.error(error);
+        this.error = 'Erreur de connexion';
       }
     },
   },

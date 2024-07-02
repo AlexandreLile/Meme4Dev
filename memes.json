@@ -1,0 +1,27 @@
+[
+  {
+    "imgUrl": "/public/images/meme.webp",
+    "title": "Mon meme 1",
+    "id": 1
+  },
+  {
+    "imgUrl": "/public/images/meme.webp",
+    "title": "Mon titre 2",
+    "id": 2
+  },
+  {
+    "imgUrl": "/public/images/meme.webp",
+    "title": "Mon idée 3",
+    "id": 3
+  },
+  {
+    "imgUrl": "/public/images/meme.webp",
+    "title": "Mon titre 4",
+    "id": 4
+  },
+  {
+    "imgUrl": "/public/images/meme.webp",
+    "title": "Mon titre 5",
+    "id": 5
+  }
+]
