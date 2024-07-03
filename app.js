@@ -76,3 +76,17 @@ app.delete('/api/memes/:id', (req, res) => {
     res.status(500).send('Erreur serveur');
   }
 });
+
+app.post('/api/authenticate', (req, res) => {
+  const password = req.body.password;
+  const correctPassword = process.env.PASSWORD;
+
+  console.log('Mot de passe saisi :', password);
+  console.log('Mot de passe attendu :', correctPassword);
+
+  if (password === correctPassword) {
+    res.send(true);
+  } else {
+    res.status(401).send(false);
+  }
+});

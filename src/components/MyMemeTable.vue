@@ -8,8 +8,15 @@
       <div v-for="meme in sortedMemes" :key="meme.id">
         <img :src="meme.imgUrl" alt="" @click="viewMeme(meme.id)" />
         <h3>{{ meme.title }}</h3>
-        <button @click="deleteMeme(meme.id)">Supprimer</button>
+        <button @click="confirmDeleteMeme(meme.id)">Supprimer</button>
       </div>
+    </div>
+
+    <!-- Boîte de dialogue de confirmation -->
+    <div v-if="showConfirmationDialog" class="confirmation-dialog dialog-container">
+      <p>Êtes-vous sûr de vouloir supprimer définitivement ce mème ?</p>
+      <button @click="deleteMeme">Oui</button>
+      <button @click="cancelDelete">Annuler</button>
     </div>
   </div>
 </template>
@@ -23,6 +30,8 @@ export default {
     return {
       searchMeme: "",
       memes: [],
+      showConfirmationDialog: false,
+      memeToDeleteId: null,
     };
   },
   components: {
@@ -41,15 +50,30 @@ export default {
           console.error("Erreur lors de la récupération des mèmes:", error);
         });
     },
-    deleteMeme(id) {
-      axios.delete(`/api/memes/${id}`)
-        .then(() => {
-          // Mise à jour locale des mèmes après suppression
-          this.memes = this.memes.filter((meme) => meme.id !== id);
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la suppression du mème:", error);
-        });
+    confirmDeleteMeme(id) {
+      console.log("Confirm delete meme with ID:", id);
+      this.memeToDeleteId = id;
+      this.showConfirmationDialog = true;
+    },
+    deleteMeme() {
+      if (this.memeToDeleteId) {
+        axios.delete(`/api/memes/${this.memeToDeleteId}`)
+          .then(() => {
+            // Mise à jour locale des mèmes après suppression
+            this.memes = this.memes.filter((meme) => meme.id !== this.memeToDeleteId);
+            // Réinitialisation
+            this.cancelDelete();
+          })
+          .catch((error) => {
+            console.error("Erreur lors de la suppression du mème:", error);
+            // Réinitialisation en cas d'erreur
+            this.cancelDelete();
+          });
+      }
+    },
+    cancelDelete() {
+      this.memeToDeleteId = null;
+      this.showConfirmationDialog = false;
     },
     viewMeme(id) {
       this.$router.push(`/memes/${id}`);
@@ -85,6 +109,24 @@ export default {
 
 
 <style scoped>
+
+.confirmation-dialog {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
+}
+.dialog-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999; /* Assurez-vous que la boîte de dialogue est au-dessus de tout le reste */
+  background-color: white; /* Fond blanc ou autre couleur de votre choix */
+  padding: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .search {
   display: flex;
   justify-content: center;
