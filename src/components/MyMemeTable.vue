@@ -8,6 +8,7 @@
       <div v-for="meme in sortedMemes" :key="meme.id">
         <img :src="meme.imgUrl" alt="" @click="showMeme(meme)" />
         <h3>{{ meme.title }}</h3>
+        <button @click="viewMeme(meme.id)">Voir Meme</button>
         <button @click="confirmDeleteMeme(meme.id)">Supprimer</button>
       </div>
     </div>
@@ -29,8 +30,6 @@
     </div>
   </div>
 </template>
-
-
 
 <script>
 import MyTitle from "./MyTitle.vue";
@@ -96,6 +95,16 @@ export default {
       this.showMemeModal = false;
       this.selectedMeme = null;
     },
+    viewMeme(id) {
+      axios.get(`/api/memes/${id}`)
+        .then((response) => {
+          // Rediriger l'utilisateur vers une autre page pour afficher le meme
+          this.$router.push({ name: 'MemeDetail', params: { id: id } });
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la récupération du mème:", error);
+        });
+    },
   },
   computed: {
     sortedMemes() {
@@ -120,6 +129,7 @@ export default {
   },
 };
 </script>
+
 
 
 

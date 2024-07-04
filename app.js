@@ -1,13 +1,21 @@
 import express from 'express';
 import cors from 'cors';
+import multer from 'multer';
+import jimp from 'jimp';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { getAllMemes, getMemeById, addMeme, updateMeme, deleteMeme } from './meme.js';
+
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/public', express.static(path.join(__dirname, 'public')));
 const hostname = '127.0.0.1';
 const port = process.env.PORT || 3000;
 
@@ -39,15 +47,52 @@ app.get('/api/memes/:id', (req, res) => {
   }
 });
 
-app.post('/api/memes', (req, res) => {
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+app.post('/api/memes', upload.single('image'), async (req, res) => {
   try {
-    const newMeme = addMeme(req.body);
+    const { topText, middleText, bottomText, title } = req.body;
+    const image = await jimp.read(req.file.buffer);
+
+    const font = await jimp.loadFont(jimp.FONT_SANS_32_WHITE);
+
+    if (topText) {
+      image.print(font, 10, 10, {
+        text: topText,
+        alignmentX: jimp.HORIZONTAL_ALIGN_CENTER,
+        alignmentY: jimp.VERTICAL_ALIGN_TOP,
+      }, image.bitmap.width, image.bitmap.height);
+    }
+
+    if (middleText) {
+      image.print(font, 10, image.bitmap.height / 2 - 16, {
+        text: middleText,
+        alignmentX: jimp.HORIZONTAL_ALIGN_CENTER,
+        alignmentY: jimp.VERTICAL_ALIGN_MIDDLE,
+      }, image.bitmap.width, image.bitmap.height);
+    }
+
+    if (bottomText) {
+      image.print(font, 10, image.bitmap.height - 50, {
+        text: bottomText,
+        alignmentX: jimp.HORIZONTAL_ALIGN_CENTER,
+        alignmentY: jimp.VERTICAL_ALIGN_BOTTOM,
+      }, image.bitmap.width, image.bitmap.height);
+    }
+
+    const memeFileName = `meme-${Date.now()}.png`;
+    const memePath = path.join(__dirname, 'public/images', memeFileName);
+    await image.writeAsync(memePath);
+
+    const newMeme = addMeme(title, `/public/images/${memeFileName}`);
     res.status(201).json(newMeme);
   } catch (error) {
     console.error('Erreur lors de l\'ajout du meme:', error);
     res.status(500).send('Erreur serveur');
   }
 });
+
 
 app.put('/api/memes/:id', (req, res) => {
   try {

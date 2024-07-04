@@ -33,11 +33,12 @@ function getMemeById(id) {
 function addMeme(title, imageUrl) {
   const memes = readMemesFromFile();
   const id = memes.length ? memes[memes.length - 1].id + 1 : 1;
-  const meme = { id, title, imageUrl };
+  const meme = { id, title, imgUrl: imageUrl };
   memes.push(meme);
   writeMemesToFile(memes);
   return meme;
 }
+
 
 function updateMeme(id, title, imageUrl) {
   const memes = readMemesFromFile();

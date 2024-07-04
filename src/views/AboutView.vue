@@ -8,10 +8,21 @@
     </div>
 
     <div class="form_meme">
-      <input type="text" v-model="topText" placeholder="Texte en haut" />
-      <input type="text" v-model="middleText" placeholder="Texte au milieu" />
-      <input type="text" v-model="bottomText" placeholder="Texte en bas" />
+      <input type="text" v-model="title" placeholder="Titre du meme" />
+      <div>
+        <input type="text" v-model="topText.content" placeholder="Texte en haut" />
+        <input type="color" v-model="topText.color" />
+      </div>
+      <div>
+        <input type="text" v-model="middleText.content" placeholder="Texte au milieu" />
+        <input type="color" v-model="middleText.color" />
+      </div>
+      <div>
+        <input type="text" v-model="bottomText.content" placeholder="Texte en bas" />
+        <input type="color" v-model="bottomText.color" />
+      </div>
       <button @click="generateMeme">Générer Meme</button>
+      <button @click="uploadMeme">Uploader Meme</button>
     </div>
   </div>
   <div v-if="resultImage">
@@ -26,14 +37,28 @@
 
 <script>
 import { Canvas, Image as FabricImage, Text as FabricText } from "fabric";
+import axios from "axios";
 
 export default {
   data() {
     return {
       selectedImage: null,
-      topText: "",
-      middleText: "",
-      bottomText: "",
+      title: "",
+      topText: {
+        content: "",
+        color: "#ffffff",
+        position: "top",
+      },
+      middleText: {
+        content: "",
+        color: "#ffffff",
+        position: "middle",
+      },
+      bottomText: {
+        content: "",
+        color: "#ffffff",
+        position: "bottom",
+      },
       canvas: null,
       showFileInput: true,
       resultImage: null,
@@ -77,41 +102,9 @@ export default {
         this.canvas.add(this.fabricImgInstance);
       }
 
-      if (this.topText) {
-        const topText = new FabricText(this.topText, {
-          left: this.canvas.getWidth() / 2,
-          top: 10,
-          fontSize: 32,
-          fill: "white",
-          textAlign: "center",
-          originX: "center",
-        });
-        this.canvas.add(topText);
-      }
-
-      if (this.middleText) {
-        const middleText = new FabricText(this.middleText, {
-          left: this.canvas.getWidth() / 2,
-          top: this.canvas.getHeight() / 2,
-          fontSize: 32,
-          fill: "white",
-          textAlign: "center",
-          originX: "center",
-        });
-        this.canvas.add(middleText);
-      }
-
-      if (this.bottomText) {
-        const bottomText = new FabricText(this.bottomText, {
-          left: this.canvas.getWidth() / 2,
-          top: this.canvas.getHeight() - 40,
-          fontSize: 32,
-          fill: "white",
-          textAlign: "center",
-          originX: "center",
-        });
-        this.canvas.add(bottomText);
-      }
+      this.drawText(this.topText);
+      this.drawText(this.middleText);
+      this.drawText(this.bottomText);
 
       const dataURL = this.canvas.toDataURL({
         format: "png",
@@ -119,6 +112,65 @@ export default {
       });
 
       this.resultImage = dataURL; // Save result image to display later
+    },
+    drawText(textObj) {
+      const { content, color, position } = textObj;
+
+      let topPosition = 10; // Default top position
+      switch (position) {
+        case "middle":
+          topPosition = this.canvas.getHeight() / 2;
+          break;
+        case "bottom":
+          topPosition = this.canvas.getHeight() - 40;
+          break;
+        default:
+          topPosition = 10;
+          break;
+      }
+
+      const fabricText = new FabricText(content, {
+        left: this.canvas.getWidth() / 2,
+        top: topPosition,
+        fontSize: 32,
+        fill: color,
+        textAlign: "center",
+        originX: "center",
+      });
+
+      this.canvas.add(fabricText);
+    },
+    uploadMeme() {
+      if (!this.resultImage) return;
+      const formData = new FormData();
+      formData.append("image", this.dataURLtoBlob(this.resultImage));
+      formData.append("title", this.title);
+      formData.append("topText", this.topText.content);
+      formData.append("middleText", this.middleText.content);
+      formData.append("bottomText", this.bottomText.content);
+
+      axios
+        .post("/api/memes", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          console.log("Meme uploaded successfully:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error uploading meme:", error);
+        });
+    },
+    dataURLtoBlob(dataURL) {
+      const byteString = atob(dataURL.split(",")[1]);
+      const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mimeString });
     },
   },
   mounted() {
@@ -135,7 +187,6 @@ export default {
   justify-content: center;
   align-items: center;
   width: 100%;
-
   padding: 0 15px;
 }
 .container_canvas {
@@ -144,13 +195,11 @@ export default {
   height: 100%;
   flex: 1;
 }
-
 #canvas {
   height: 100%;
   width: 100%;
   border: 1px solid #ccc;
 }
-
 .form_meme {
   display: flex;
   justify-content: center;
@@ -159,7 +208,8 @@ export default {
   flex: 1;
 }
 input,
-button {
+button,
+select {
   margin: 10px;
 }
 </style>
