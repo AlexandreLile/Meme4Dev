@@ -18,6 +18,7 @@
     "fabric": "^6.0.0",
     "fs": "^0.0.1-security",
     "jimp": "^0.22.12",
+    "multer": "^1.4.5-lts.1",
     "pinia": "^2.1.7",
     "vite-plugin-commonjs": "^0.10.1",
     "vue": "^3.4.29",
