@@ -6,7 +6,7 @@
     </div>
     <div class="grid">
       <div v-for="meme in sortedMemes" :key="meme.id">
-        <img :src="meme.imgUrl" alt="" @click="viewMeme(meme.id)" />
+        <img :src="meme.imgUrl" alt="" @click="showMeme(meme)" />
         <h3>{{ meme.title }}</h3>
         <button @click="confirmDeleteMeme(meme.id)">Supprimer</button>
       </div>
@@ -18,8 +18,19 @@
       <button @click="deleteMeme">Oui</button>
       <button @click="cancelDelete">Annuler</button>
     </div>
+
+    <!-- Modal pour afficher le meme en grand -->
+    <div v-if="showMemeModal" class="meme-modal" @click="closeMemeModal">
+      <div class="meme-modal-content" @click.stop>
+        <span class="close" @click="closeMemeModal">&times;</span>
+        <img :src="selectedMeme.imgUrl" alt="" />
+        <h3>{{ selectedMeme.title }}</h3>
+      </div>
+    </div>
   </div>
 </template>
+
+
 
 <script>
 import MyTitle from "./MyTitle.vue";
@@ -32,6 +43,8 @@ export default {
       memes: [],
       showConfirmationDialog: false,
       memeToDeleteId: null,
+      showMemeModal: false,
+      selectedMeme: null,
     };
   },
   components: {
@@ -75,8 +88,13 @@ export default {
       this.memeToDeleteId = null;
       this.showConfirmationDialog = false;
     },
-    viewMeme(id) {
-      this.$router.push(`/memes/${id}`);
+    showMeme(meme) {
+      this.selectedMeme = meme;
+      this.showMemeModal = true;
+    },
+    closeMemeModal() {
+      this.showMemeModal = false;
+      this.selectedMeme = null;
     },
   },
   computed: {
@@ -108,8 +126,9 @@ export default {
 
 
 
-<style scoped>
 
+
+<style scoped>
 .confirmation-dialog {
   border: 1px solid #ccc;
   padding: 10px;
@@ -188,4 +207,41 @@ export default {
   gap: 15px;
   width: 100%;
 }
+
+.meme-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.meme-modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  position: relative;
+}
+
+.meme-modal-content img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 10px;
+}
+
+.meme-modal-content .close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 2rem;
+  cursor: pointer;
+}
 </style>
+
+
