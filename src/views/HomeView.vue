@@ -2,7 +2,7 @@
   <main>
     <div class="container_title">
       <MyTitle tag="h1">Créer votre <strong>MEME</strong> personnalisé</MyTitle>
-      <MyLink></MyLink>
+      <MyLink text="Créer un MEME" link="créer_un_meme"></MyLink>
     </div>
     <MyMemeTable></MyMemeTable>
   </main>
@@ -32,5 +32,6 @@ export default {
   flex-direction: column;
   gap: 25px;
   padding-top: 100px;
+  text-align: center;
 }
 </style>

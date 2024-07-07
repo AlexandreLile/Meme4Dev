@@ -32,7 +32,7 @@ export default {
 
     link: {
       type: String,
-      default: "/about",
+      default: "/home",
       required: true,
     },
   },

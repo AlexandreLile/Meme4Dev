@@ -11,9 +11,9 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/about",
-    name: "about",
-    component: () => import("../views/AboutView.vue"),
+    path: "/créer_un_MEME",
+    name: "meme",
+    component: () => import("../views/createMeme.vue"),
     meta: { requiresAuth: true },
   },
   {
@@ -27,14 +27,14 @@ const routes = [
     component: LogoutView,
   },
   {
-    path: '/memes/:id',
-    name: 'MemeDetail',
+    path: "/memes/:id",
+    name: "MemeDetail",
     component: () => import("../views/DetailMemeView.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: '/memes/deleted/:id',
-    name: 'MemeDeleted',
+    path: "/memes/deleted/:id",
+    name: "MemeDeleted",
     component: () => import("../views/MemeDeletedView.vue"),
     meta: { requiresAuth: true },
   },
